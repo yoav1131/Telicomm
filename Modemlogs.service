@@ -1,0 +1,11 @@
+[Unit]
+Description=Modem logs
+After=network.target
+
+[Service]
+ExecStart=/home/telicomm/EA/atinout/modemlogs
+Restart=always
+WorkingDirectory=/home/telicomm/EA/atinout
+
+[Install]
+WantedBy=multi-user.target
