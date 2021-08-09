@@ -1,0 +1,11 @@
+[Unit]
+Description=EA WatchDog
+After=network.target
+
+[Service]
+ExecStart=/home/telicomm/EA/atinout/sshWD
+Restart=always
+WorkingDirectory=/home/telicomm/EA/atinout
+
+[Install]
+WantedBy=multi-user.target
