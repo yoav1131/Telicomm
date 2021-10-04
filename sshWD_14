@@ -1,0 +1,48 @@
+#! /bin/bash
+counter=0
+
+for (( ; ; ))
+do
+  today=$(TZ=Asia/Jerusalem date +'%F %T')
+  echo $today >> logWD.txt
+  uptime=$(cat /proc/uptime | awk '{ print int($1); }')
+  free=$(free -m)
+  echo $free >> logWD.txt
+  sn=$(sudo dmidecode -s system-serial-number)
+  echo <insert_password> | sudo -S echo
+  ip=$(ifconfig | awk 'BEGIN{ t="notun0" } { if( $1 ~ "tun0" ) {getline ; t = $2; exit} } END{ print t}')
+  ipsn=$ip'_'$sn
+  #echo $ipsn
+  mdmVers=$(tail -30 modemlogs.txt | awk '{if ($1 ~ "version:") {print $2} }')
+  unix=$(tail -28 modemlogs.txt | awk '{ if ($1 ~ "Timestamp:") {print $2} }')
+  disk=$(df -h | awk '{ if($1 ~ "/dev/sda2") { print $5} }')
+  mode=$(tail -100 modemlogs.txt | awk '{ if ($1 ~ "System")  { lte=$3 ; exit } } END{ print lte} ')
+  mem=$(free -m | awk '{ if($1 ~ "Mem:")  { print $3 ; } }')
+  res=$(curl -m 15 -X GET -G dev.telicomm.info/projects/telicomm/report_ea1.php -d status=pass -d version=14 -d uptime=${uptime} -d mem=${mem} -d mode=${mode} -d ipsn=${ipsn} -d disk=${disk} -d unix=${unix} -d mdmver=${mdmVers} 2>&1)
+  echo "$res" >> logWD.txt
+  isok=$(echo "$res" | awk 'BEGIN{r="fail";}{if ($0 ~ "status: pass") r="ok" ;} END{print r;} ')
+  ok="ok"
+  lte="LTE"
+
+  if [[ $mode != $lte ]]
+  then
+  echo "mode: $mode" >> logWD.txt
+  #echo AT\!BAND=09 | sudo ./atinout - /dev/ttyUSB2 -
+  #echo <insert_password> | sudo -S echo
+  fi
+
+  if [[ $isok = $ok ]]
+  then
+  counter=0
+  else
+  ((counter++))
+  fi
+  echo "counter = $counter" >> logWD.txt
+  if [[ $counter -ge 20 && $uptime -ge 1800 ]]
+  then
+  echo "Rebooting..." >> logWD.txt
+  echo <insert_password> | sudo -S reboot
+  fi
+  sleep 10
+
+done

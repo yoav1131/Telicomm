@@ -3,9 +3,11 @@ echo AT\!ENTERCND='"A710"' | sudo ./atinout - /dev/ttyUSB2 -
 index=0
 for (( ; ; ))
 do
+  version=01
+  echo "version: version"_$version >> modemlogs.txt
   (echo "Timestamp:"; echo '('`date +"%s.%N"` ' * 1000000)/1' | bc) | tr '\n' '\t' >> modemlogs.txt
   today=$(TZ=Asia/Jerusalem date +'%F %T')
-  echo $today >> modemlogs.txt 
+  echo $today >> modemlogs.txt
   echo AT\!GSTATUS? | sudo ./atinout - /dev/ttyUSB2 - >> modemlogs.txt
   #echo AT\!DALGTXAGC? | sudo ./atinout - /dev/ttyUSB2 -
   #echo AT\!LTEINFO? | sudo ./atinout - /dev/ttyUSB2 -
@@ -15,5 +17,5 @@ do
    echo <insert passwd> | sudo -S echo
   fi
   ((index++))
-  sleep 1
+  sleep 10
 done
